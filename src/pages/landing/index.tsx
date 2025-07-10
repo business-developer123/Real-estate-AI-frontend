@@ -4,26 +4,24 @@ import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHi
 import HomeListingCard from '../../components/HomeListingCard';
 
 const suggestions = [
-    'Show me 3 bed, 2 bath single-family homes in Austin, TX under $350K',
-    'What’s the estimated ARV for 456 Elm St, Dallas, TX 75201?',
-    'Calculate the cap rate for a rental at 789 Pine Ave, Seattle, WA',
-    'Find all properties for sale in San Antonio, TX with at least 5 % rental yield',
+    "Find me all single family homes for sale with a pool in 92037",
+    "What is the estimated value of 7209 48th Street Ct NW, Gig Harbor, WA 98335?",
+    "Show me all single family homes for sale in Phoenix, AZ under $400K",
+    "What's the average list price of for-sale 2 bed, 2 bath homes in Phoenix, AZ?",
 ];
-
-const GOOGLE_MAPS_API_KEY = "AIzaSyC1faHDtgBc8q9Lymkr32G6QUiNZYL5AuE";
-;
 
 const Landing: React.FC = () => {
     const [search, setSearch] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchMessage, setSearchMessage] = useState('');
     const [listings, setListings] = useState([]);
-    const [showListingsPanel, setShowListingsPanel] = useState(false);
     const [viewMode, setViewMode] = useState('card');
     const [description, setDescription] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const fetchSearch = async (message: string) => {
-        const response = await fetch(`http://localhost:1001/api/v1/simpai/analyze-property`, {
+        setIsLoading(true);
+        const response = await fetch(`https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-property`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -33,6 +31,7 @@ const Landing: React.FC = () => {
         const data = await response.json();
         setListings(data.listings);
         setDescription(data.description);
+        setIsLoading(false);
         return data;
     }
 
@@ -117,7 +116,11 @@ const Landing: React.FC = () => {
                                 </div>
                                 <div className="assistant-message">
                                     <span className="icon" role="img" aria-label="ai">🤖</span>
-                                    <p dangerouslySetInnerHTML={{ __html: description }} />
+                                    {isLoading ? (
+                                        <span>Loading...</span>
+                                    ) : (
+                                        <p dangerouslySetInnerHTML={{ __html: description }} />
+                                    )}
                                 </div>
                             </div>
                             <div className="landing-card-bottom">
@@ -159,7 +162,7 @@ const Landing: React.FC = () => {
                                             </button>
                                         </div>
                                     </div>
-                                    <button className="listings-panel-close-btn" onClick={() => setShowListingsPanel(false)} title="Close">
+                                    <button className="listings-panel-close-btn" title="Close">
                                         <FaTimes />
                                     </button>
                                 </div>

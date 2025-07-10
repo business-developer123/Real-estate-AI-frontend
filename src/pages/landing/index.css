@@ -1798,7 +1798,7 @@
 
 .assistant-message {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     margin: 0;
     font-size: 16px;
     color: #a259e6;
@@ -1811,6 +1811,10 @@
     text-align: left;
     align-self: stretch;
     gap: 6px;
+}
+
+.assistant-message>p {
+    margin-top: 0;
 }
 
 .assistant-message .icon {

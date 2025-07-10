@@ -10,20 +10,17 @@ const suggestions = [
     'Find all properties for sale in San Antonio, TX with at least 5 % rental yield',
 ];
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyC1faHDtgBc8q9Lymkr32G6QUiNZYL5AuE";
-;
 
 const Landing: React.FC = () => {
     const [search, setSearch] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchMessage, setSearchMessage] = useState('');
     const [listings, setListings] = useState([]);
-    const [showListingsPanel, setShowListingsPanel] = useState(false);
     const [viewMode, setViewMode] = useState('card');
     const [description, setDescription] = useState('');
 
     const fetchSearch = async (message: string) => {
-        const response = await fetch(`http://localhost:1001/api/v1/simpai/analyze-property`, {
+        const response = await fetch(`https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-property`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -159,7 +156,7 @@ const Landing: React.FC = () => {
                                             </button>
                                         </div>
                                     </div>
-                                    <button className="listings-panel-close-btn" onClick={() => setShowListingsPanel(false)} title="Close">
+                                    <button className="listings-panel-close-btn" title="Close">
                                         <FaTimes />
                                     </button>
                                 </div>

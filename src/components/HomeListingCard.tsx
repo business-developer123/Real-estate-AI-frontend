@@ -28,7 +28,6 @@ const HomeListingCard: React.FC<HomeListingCardProps> = ({
     onClick,
 }) => {
 
-    console.log(imageUrl, address, beds, baths, sqft, price);
     return (
         <div className="home-listing-card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : undefined }}>
             <div className="home-listing-image-wrap">

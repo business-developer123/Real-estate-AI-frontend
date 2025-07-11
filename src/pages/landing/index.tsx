@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './index.css';
 import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHistory, FaRegEdit, FaTimes, FaThLarge, FaMap, FaDownload, FaRegClock, FaBed, FaBath, FaRulerCombined } from 'react-icons/fa';
 import HomeListingCard from '../../components/HomeListingCard';
-import GoogleMapReact from 'google-map-react';
-import Marker from '../../components/Marker';
+// import GoogleMapReact from 'google-map-react';
+// import Marker from '../../components/Marker';
 
 const suggestions = [
     "Find me all single family homes for sale with a pool in 92037",

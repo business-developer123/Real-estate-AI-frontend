@@ -8,6 +8,7 @@ interface HomeListingCardProps {
     sqft: number;
     price: number;
     onReportClick?: () => void;
+    onClick?: () => void;
     city?: string;
     state?: string;
     zipcode?: string;
@@ -24,11 +25,12 @@ const HomeListingCard: React.FC<HomeListingCardProps> = ({
     state,
     zipcode,
     onReportClick,
+    onClick,
 }) => {
 
     console.log(imageUrl, address, beds, baths, sqft, price);
     return (
-        <div className="home-listing-card">
+        <div className="home-listing-card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : undefined }}>
             <div className="home-listing-image-wrap">
                 <img
                     src={imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'}
@@ -43,7 +45,7 @@ const HomeListingCard: React.FC<HomeListingCardProps> = ({
                     <span>{beds} Bed</span> / <span>{baths} Bath</span> / <span>{sqft.toLocaleString()} ft²</span>
                 </div>
                 <div className="home-listing-price">${price.toLocaleString()}</div>
-                <button className="home-listing-report-btn" onClick={onReportClick}>Get Property Report</button>
+                <button className="home-listing-report-btn" onClick={e => { e.stopPropagation(); onReportClick && onReportClick(); }}>Get Property Report</button>
             </div>
         </div>
     );

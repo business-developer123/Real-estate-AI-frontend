@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './index.css';
-import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHistory, FaRegEdit, FaTimes, FaThLarge, FaMap } from 'react-icons/fa';
+import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHistory, FaRegEdit, FaTimes, FaThLarge, FaMap, FaDownload, FaRegClock, FaBed, FaBath, FaRulerCombined } from 'react-icons/fa';
 import HomeListingCard from '../../components/HomeListingCard';
+import GoogleMapReact from 'google-map-react';
+import Marker from '../../components/Marker';
 
 const suggestions = [
     "Find me all single family homes for sale with a pool in 92037",
@@ -18,6 +20,10 @@ const Landing: React.FC = () => {
     const [viewMode, setViewMode] = useState('card');
     const [description, setDescription] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isHomeDisplayed, setIsHomeDisplayed] = useState(true);
+    const [selectedHome, setSelectedHome] = useState<any | null>(null);
+    const [detailTab, setDetailTab] = useState<'images' | 'street'>('images');
+    const [selectedImageIdx, setSelectedImageIdx] = useState(0);
 
     const fetchSearch = async (message: string) => {
         setIsLoading(true);
@@ -56,6 +62,23 @@ const Landing: React.FC = () => {
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);
     }
+
+    const downloadCSV = () => {
+        if (!listings || listings.length === 0) return;
+        const replacer = (key: string, value: any) => value === null ? '' : value;
+        const header = Object.keys(listings[0]);
+        const csv = [
+            header.join(','),
+            ...listings.map((row: any) => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+        ].join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'listings.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
 
     useEffect(() => {
         document.addEventListener('keydown', (e) => {
@@ -114,11 +137,19 @@ const Landing: React.FC = () => {
                                     {searchMessage}
                                 </div>
                                 <div className="assistant-message">
-                                    <span className="icon" role="img" aria-label="ai">🤖</span>
+                                    <span style={{ marginTop: 18 }} className="icon" role="img" aria-label="ai">🤖</span>
                                     {isLoading ? (
                                         <span>Loading...</span>
                                     ) : (
-                                        <p dangerouslySetInnerHTML={{ __html: description }} />
+                                        <div style={{ width: '100%' }}>
+                                            <p dangerouslySetInnerHTML={{ __html: description }} />
+                                            <div className="download-row">
+                                                <span className="download-csv-btn" onClick={downloadCSV}>
+                                                    <FaDownload style={{ marginRight: 8 }} /> Download as CSV
+                                                </span>
+                                                <span className="download-status" onClick={() => setIsHomeDisplayed(true)}><FaRegClock style={{ marginRight: 6 }} />Viewing now</span>
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -140,56 +171,117 @@ const Landing: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        {Array.isArray(listings) && listings.length > 0 && (
-                            <div className="landing-listings-panel">
-                                <div className="listings-panel-header-bar">
-                                    <div className="listings-panel-header-bar">
-                                        <div className="listings-toggle-group">
-                                            <button
-                                                className={`listings-toggle-btn${viewMode === 'card' ? ' active' : ''}`}
-                                                onClick={() => setViewMode('card')}
-                                            >
-                                                <FaThLarge style={{ marginRight: 6 }} />
-                                                Card view
-                                            </button>
-                                            <button
-                                                className={`listings-toggle-btn${viewMode === 'map' ? ' active' : ''}`}
-                                                onClick={() => setViewMode('map')}
-                                            >
-                                                <FaMap style={{ marginRight: 6 }} />
-                                                Map
-                                            </button>
-                                        </div>
+                        {selectedHome ? (
+                            <div className="home-detail-section">
+                                <div className="home-detail-header">
+                                    <button className="home-detail-back" onClick={() => setSelectedHome(null)}>&lt; Back to preview</button>
+                                    <div className="home-detail-title">{selectedHome.streetAddress}</div>
+                                    <div className="home-detail-location">{selectedHome.city}, {selectedHome.state} {selectedHome.zipcode}</div>
+                                    <div className="home-detail-info-row">
+                                        <span className="home-detail-info"><FaBed /> {selectedHome.bedrooms} BR</span>
+                                        <span className="home-detail-info"><FaBath /> {selectedHome.bathrooms} BA</span>
+                                        <span className="home-detail-info"><FaRulerCombined /> {selectedHome.livingArea} Sq.ft</span>
+                                        <span className="home-detail-info home-detail-price">List price <b>${selectedHome.price?.toLocaleString()}</b></span>
                                     </div>
-                                    <button className="listings-panel-close-btn" title="Close">
-                                        <FaTimes />
-                                    </button>
                                 </div>
-                                {viewMode === 'card' && (
-                                    <div className="home-listings-grid">
-                                        {listings.map((listing: any, idx: number) => (
-                                            <HomeListingCard
-                                                key={idx}
-                                                imageUrl={listing.imgSrc}
-                                                address={listing.streetAddress}
-                                                beds={listing.bedrooms || 0}
-                                                baths={listing.bathrooms || 0}
-                                                sqft={listing.livingArea || 0}
-                                                price={listing.price || 0}
-                                                city={listing.city}
-                                                state={listing.state}
-                                                zipcode={listing.zipcode}
-                                                onReportClick={() => window.open(listing.property_url, '_blank')}
-                                            />
-                                        ))}
-                                    </div>
+                                <div className="home-detail-tabs">
+                                    <button className={`home-detail-tab${detailTab === 'images' ? ' active' : ''}`} onClick={() => setDetailTab('images')}>Images</button>
+                                    <button className={`home-detail-tab${detailTab === 'street' ? ' active' : ''}`} onClick={() => setDetailTab('street')}>Street view</button>
+                                </div>
+                                {detailTab === 'images' && (
+                                    <>
+                                        <div className="home-detail-main-image-wrap">
+                                            <button className="home-detail-img-arrow left" onClick={() => setSelectedImageIdx(idx => Math.max(0, idx - 1))} disabled={selectedImageIdx === 0}>&lt;</button>
+                                            <img className="home-detail-main-image" src={selectedHome.imgSrcArray?.[selectedImageIdx] || selectedHome.imgSrc} alt="Home" />
+                                            <button className="home-detail-img-arrow right" onClick={() => setSelectedImageIdx(idx => Math.min((selectedHome.imgSrcArray?.length || 1) - 1, idx + 1))} disabled={selectedImageIdx === (selectedHome.imgSrcArray?.length || 1) - 1}>&gt;</button>
+                                        </div>
+                                        <div className="home-detail-thumbnails">
+                                            {(selectedHome.imgSrcArray || [selectedHome.imgSrc]).map((img: string, idx: number) => (
+                                                <img
+                                                    key={idx}
+                                                    src={img}
+                                                    alt="thumb"
+                                                    className={`home-detail-thumb${selectedImageIdx === idx ? ' selected' : ''}`}
+                                                    onClick={() => setSelectedImageIdx(idx)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </>
                                 )}
-                                {viewMode === 'map' && (
-                                    <div className="home-listings-map-placeholder">
-                                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3342.4430975540613!2d-111.46325329999999!3d33.097432999999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x872a386fdf0e866d%3A0x70ef52310c8ebead!2s9564%20Cotton%20Rd%2C%20Florence%2C%20AZ%2085132%2C%20USA!5e0!3m2!1sen!2sfr!4v1752180489674!5m2!1sen!2sfr" style={{ width: '100%', height: '100%', border: 0, borderRadius: 10 }} ></iframe>
-                                    </div>
+                                {detailTab === 'street' && (
+                                    <div className="home-detail-streetview">Street view coming soon...</div>
                                 )}
                             </div>
+                        ) : (
+                            <>
+                                {Array.isArray(listings) && listings.length > 0 && (
+                                    <div className={`landing-listings-panel ${!isHomeDisplayed ? 'landing-listings-panel-home-displayed' : ''}`}>
+                                        <div className="listings-panel-header-bar">
+                                            <div className="listings-panel-header-bar">
+                                                <div className="listings-toggle-group">
+                                                    <button
+                                                        className={`listings-toggle-btn${viewMode === 'card' ? ' active' : ''}`}
+                                                        onClick={() => setViewMode('card')}
+                                                    >
+                                                        <FaThLarge style={{ marginRight: 6 }} />
+                                                        Card view
+                                                    </button>
+                                                    <button
+                                                        className={`listings-toggle-btn${viewMode === 'map' ? ' active' : ''}`}
+                                                        onClick={() => setViewMode('map')}
+                                                    >
+                                                        <FaMap style={{ marginRight: 6 }} />
+                                                        Map
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <button className="listings-panel-close-btn" onClick={() => setIsHomeDisplayed(false)} title="Close">
+                                                <FaTimes />
+                                            </button>
+                                        </div>
+                                        {viewMode === 'card' && (
+                                            <div className="home-listings-grid">
+                                                {listings.map((listing: any, idx: number) => (
+                                                    <HomeListingCard
+                                                        key={idx}
+                                                        imageUrl={listing.imgSrc}
+                                                        address={listing.streetAddress}
+                                                        beds={listing.bedrooms || 0}
+                                                        baths={listing.bathrooms || 0}
+                                                        sqft={listing.livingArea || 0}
+                                                        price={listing.price || 0}
+                                                        city={listing.city}
+                                                        state={listing.state}
+                                                        zipcode={listing.zipcode}
+                                                        onReportClick={() => window.open(listing.property_url, '_blank')}
+                                                        onClick={() => {
+                                                            setSelectedHome(listing);
+                                                            setDetailTab('images');
+                                                            setSelectedImageIdx(0);
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                        {viewMode === 'map' && (
+                                            <div className="home-listings-map-placeholder">
+                                                <iframe
+                                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3305.010198307079!2d-118.46951908486324!3d34.07223478060939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2bc04d6d14bbf%3A0xf67a3861bbd4e617!2s211%20N%20Main%20St%2C%20Los%20Angeles%2C%20CA%2090012!5e0!3m2!1sen!2sus!4v1720752182086!5m2!1sen!2sus"
+                                                    width="100%" height="100%" style={{ border: 0, borderRadius: 12 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                                                {/* <GoogleMapReact
+                                                    bootstrapURLKeys={{ key: "AlzaSyB32OTfrZzx4ypSxpQdQHXUeaMwL--nfVw" }}
+                                                    defaultCenter={{ lat: 33.0974329, lng: -111.4632532 }}
+                                                    defaultZoom={15}
+                                                >
+                                                    {listings.map((listing: any, idx: number) => (
+                                                        <Marker key={idx} lat={listing.latitude} lng={listing.longitude} />
+                                                    ))}
+                                                </GoogleMapReact> */}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 ) : (

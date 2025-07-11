@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Marker = ({ lat, lng, listing }: { lat: number, lng: number, listing: any }) => {
+const Marker = ({ listing }: { listing: any }) => {
     console.log(listing);
     const [isHovered, setIsHovered] = useState(false);
     return <>

@@ -21,7 +21,7 @@ const Landing: React.FC = () => {
 
     const fetchSearch = async (message: string) => {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:1001/api/v1/simpai/analyze-property`, {
+        const response = await fetch(`https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-property`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

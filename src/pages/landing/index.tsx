@@ -283,7 +283,7 @@ const Landing: React.FC = () => {
                                                     defaultZoom={12}
                                                 >
                                                     {listings.map((listing: any, idx: number) => (
-                                                        <Marker key={idx} lat={listing.latitude} lng={listing.longitude} listing={listing} />
+                                                        <Marker key={idx} listing={listing} />
                                                     ))}
                                                 </GoogleMapReact>
                                             </div>

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './index.css';
 import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHistory, FaRegEdit, FaTimes, FaThLarge, FaMap, FaDownload, FaRegClock, FaBed, FaBath, FaRulerCombined } from 'react-icons/fa';
 import HomeListingCard from '../../components/HomeListingCard';
-// import GoogleMapReact from 'google-map-react';
-// import Marker from '../../components/Marker';
+import GoogleMapReact from 'google-map-react';
+import Marker from '../../components/Marker';
 
 const suggestions = [
     "Find me all single family homes for sale with a pool in 92037",
@@ -16,7 +16,7 @@ const Landing: React.FC = () => {
     const [search, setSearch] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchMessage, setSearchMessage] = useState('');
-    const [listings, setListings] = useState([]);
+    const [listings, setListings] = useState<any[]>([]);
     const [viewMode, setViewMode] = useState('card');
     const [description, setDescription] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +24,16 @@ const Landing: React.FC = () => {
     const [selectedHome, setSelectedHome] = useState<any | null>(null);
     const [detailTab, setDetailTab] = useState<'images' | 'street'>('images');
     const [selectedImageIdx, setSelectedImageIdx] = useState(0);
+    const [latitude, setLatitude] = useState(33.0974329);
+    const [longitude, setLongitude] = useState(-111.4632532);
+
+    useEffect(() => {
+        if (listings.length > 0) {
+            const firstListing = listings[0] as any;
+            setLatitude(firstListing.latitude || latitude);
+            setLongitude(firstListing.longitude || longitude);
+        }
+    }, [listings]);
 
     const fetchSearch = async (message: string) => {
         setIsLoading(true);
@@ -139,7 +149,7 @@ const Landing: React.FC = () => {
                                 <div className="assistant-message">
                                     <span style={{ marginTop: 18 }} className="icon" role="img" aria-label="ai">🤖</span>
                                     {isLoading ? (
-                                        <span>Loading...</span>
+                                        <span style={{ marginTop: 18 }}>Loading...</span>
                                     ) : (
                                         <div style={{ width: '100%' }}>
                                             <p dangerouslySetInnerHTML={{ __html: description }} />
@@ -265,18 +275,17 @@ const Landing: React.FC = () => {
                                         )}
                                         {viewMode === 'map' && (
                                             <div className="home-listings-map-placeholder">
-                                                <iframe
-                                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3305.010198307079!2d-118.46951908486324!3d34.07223478060939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2bc04d6d14bbf%3A0xf67a3861bbd4e617!2s211%20N%20Main%20St%2C%20Los%20Angeles%2C%20CA%2090012!5e0!3m2!1sen!2sus!4v1720752182086!5m2!1sen!2sus"
-                                                    width="100%" height="100%" style={{ border: 0, borderRadius: 12 }} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
-                                                {/* <GoogleMapReact
-                                                    bootstrapURLKeys={{ key: "AlzaSyB32OTfrZzx4ypSxpQdQHXUeaMwL--nfVw" }}
-                                                    defaultCenter={{ lat: 33.0974329, lng: -111.4632532 }}
-                                                    defaultZoom={15}
+                                                <GoogleMapReact
+                                                    bootstrapURLKeys={{ key: "AIzaSyB6IcDkdLFimq6E5YVNyuslp3Z2O2IpZU0" }}
+                                                    // AIzaSyB32OTfrZzx4ypSxpQdQHXUeaMwL--nfVw
+                                                    // AIzaSyB6IcDkdLFimq6E5YVNyuslp3Z2O2IpZU0
+                                                    defaultCenter={{ lat: latitude, lng: longitude }}
+                                                    defaultZoom={12}
                                                 >
                                                     {listings.map((listing: any, idx: number) => (
-                                                        <Marker key={idx} lat={listing.latitude} lng={listing.longitude} />
+                                                        <Marker key={idx} lat={listing.latitude} lng={listing.longitude} listing={listing} />
                                                     ))}
-                                                </GoogleMapReact> */}
+                                                </GoogleMapReact>
                                             </div>
                                         )}
                                     </div>

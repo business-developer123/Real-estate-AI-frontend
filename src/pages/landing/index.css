@@ -2322,3 +2322,140 @@
     background: #f6f6f7;
     border-radius: 14px;
 }
+
+.marker-container {
+    background: rgb(163, 0, 11);
+    width: 12px;
+    height: 12px;
+    line-height: 8px;
+    border-radius: 50%;
+    border-width: 2;
+    border-style: solid;
+    border-color: #ffffff;
+    transform: translate(0px, 2px);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 7;
+    text-align: center;
+    transition: 0.4s;
+    cursor: pointer;
+}
+
+.marker-container:hover {
+    background: rgb(38, 158, 2);
+    width: 12px;
+    height: 12px;
+    line-height: 8px;
+    border-radius: 50%;
+    border-width: 2;
+    border-style: solid;
+    border-color: #ffffff;
+    transition: 0.4s;
+}
+
+.marker-tooltip {
+    position: absolute;
+    z-index: 999999999999;
+    top: -44px;
+    left: -47px;
+    background: #ca6ad3;
+    padding: 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #222;
+    font-size: 14px;
+    font-weight: 500;
+    width: 80px;
+    text-align: center;
+    border-radius: 17px;
+    border: 1px solid #f1f1f7;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: 0.4s;
+}
+
+.marker-tooltip::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: #ca6ad3 transparent transparent transparent;
+}
+
+.marker-data-tooltip {
+    position: absolute;
+    position: absolute;
+    z-index: 999999999999;
+    top: -148px;
+    left: 8px;
+    transform: translateX(-50%);
+    background: #fff;
+    padding: 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: 0.4s;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #222;
+    width: 200px;
+    text-align: center;
+    border-radius: 17px;
+    border: 1px solid #f1f1f7;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: 0.4s;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.marker-data-tooltop::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: #ca6ad3 transparent transparent transparent;
+}
+
+.marker-data-tooltip-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    font-size: 1rem;
+    color: #444;
+}
+
+.marker-data-tooltip-item-label {
+    color: #888;
+    min-width: 70px;
+    font-size: 0.98rem;
+}
+
+.marker-data-tooltip-item-value {
+    color: #222;
+    font-weight: 500;
+    font-size: 1.05rem;
+}
+
+.marker-city-state-zipcode {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 0.98rem;
+}
+
+.marker-bedrooms-bathrooms-square-feet {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 0.98rem;
+}

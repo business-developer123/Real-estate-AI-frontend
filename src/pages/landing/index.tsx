@@ -92,7 +92,7 @@ const Landing: React.FC = () => {
 
     const downloadCSV = () => {
         if (!listings || listings.length === 0) return;
-        const replacer = (_: string, value: any) => value === null ? '' : value;
+        const replacer = (_: any, value: any) => value === null ? '' : value;
         const header = Object.keys(listings[0]);
         const csv = [
             header.join(','),

@@ -108,10 +108,19 @@ const Landing: React.FC = () => {
     };
 
     const getStreetViewUrl = async (url: string) => {
-        const response = await fetch(url);
+        const response = await fetch("http://localhost:1001/api/v1/simpai/streetview", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ location: url }),
+        });
         const data = await response.json();
         const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${data.location.lat},${data.location.lng}&heading=90&pitch=0&key=AIzaSyBV4lXhV-qzQOegyA3m0_AvGy9F21HIyOQ`;
-        setStreetImage(imageUrl);
+        const image = await fetch(imageUrl);
+        const imageBlob = await image.blob();
+        const streetImageUrl = URL.createObjectURL(imageBlob);
+        setStreetImage(streetImageUrl);
     }
 
     useEffect(() => {
@@ -151,6 +160,7 @@ const Landing: React.FC = () => {
                     <div className="header-avatar">B</div>
                 </div>
             </header>
+
             {/* Main Content */}
             <div className="landing-main landing-main-centered">
                 {/* Sidebar */}
@@ -248,7 +258,11 @@ const Landing: React.FC = () => {
                                 )}
                                 {detailTab === 'street' && (
                                     <div className="home-detail-streetview">
-                                        <img src={streetImage} className="home-detail-streetview-image" alt="Street view" />
+                                        {
+                                            streetImage && (
+                                                <img src={streetImage} className="home-detail-streetview-image" alt="Street view" />
+                                            )
+                                        }
                                     </div>
                                 )}
                             </div>

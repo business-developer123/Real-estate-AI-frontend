@@ -26,6 +26,9 @@ const Landing: React.FC = () => {
     const [selectedImageIdx, setSelectedImageIdx] = useState(0);
     const [latitude, setLatitude] = useState(33.0974329);
     const [longitude, setLongitude] = useState(-111.4632532);
+    const [homeDetail, setHomeDetail] = useState<any[]>([]);
+    const [streetViewUrl, setStreetViewUrl] = useState('');
+    const [streetImage, setStreetImage] = useState('');
 
     useEffect(() => {
         if (listings.length > 0) {
@@ -73,9 +76,23 @@ const Landing: React.FC = () => {
         setSearch(e.target.value);
     }
 
+    const getHomeDetail = async (address: string) => {
+        console.log(address);
+        const response = await fetch(`https://zillow56.p.rapidapi.com/search_address?address=${address}`, {
+            method: 'GET',
+            headers: {
+                'x-rapidapi-key': "2e5dd68fe7mshd661c7de69087c4p153130jsn820b372673ae",
+                'x-rapidapi-host': 'zillow56.p.rapidapi.com'
+            }
+        });
+        const data = await response.json();
+        setStreetViewUrl(data.streetViewMetadataUrlMapLightboxAddress);
+        setHomeDetail(data.originalPhotos);
+    }
+
     const downloadCSV = () => {
         if (!listings || listings.length === 0) return;
-        const replacer = (key: string, value: any) => value === null ? '' : value;
+        const replacer = (_: string, value: any) => value === null ? '' : value;
         const header = Object.keys(listings[0]);
         const csv = [
             header.join(','),
@@ -89,6 +106,19 @@ const Landing: React.FC = () => {
         a.click();
         window.URL.revokeObjectURL(url);
     };
+
+    const getStreetViewUrl = async (url: string) => {
+        const response = await fetch(url);
+        const data = await response.json();
+        const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${data.location.lat},${data.location.lng}&heading=90&pitch=0&key=AIzaSyBV4lXhV-qzQOegyA3m0_AvGy9F21HIyOQ`;
+        setStreetImage(imageUrl);
+    }
+
+    useEffect(() => {
+        if (detailTab === 'street' && streetViewUrl) {
+            getStreetViewUrl(streetViewUrl);
+        }
+    }, [detailTab, streetViewUrl])
 
     useEffect(() => {
         document.addEventListener('keydown', (e) => {
@@ -199,27 +229,27 @@ const Landing: React.FC = () => {
                                     <button className={`home-detail-tab${detailTab === 'street' ? ' active' : ''}`} onClick={() => setDetailTab('street')}>Street view</button>
                                 </div>
                                 {detailTab === 'images' && (
-                                    <>
+                                    <div className="home-detail-images-section">
                                         <div className="home-detail-main-image-wrap">
-                                            <button className="home-detail-img-arrow left" onClick={() => setSelectedImageIdx(idx => Math.max(0, idx - 1))} disabled={selectedImageIdx === 0}>&lt;</button>
-                                            <img className="home-detail-main-image" src={selectedHome.imgSrcArray?.[selectedImageIdx] || selectedHome.imgSrc} alt="Home" />
-                                            <button className="home-detail-img-arrow right" onClick={() => setSelectedImageIdx(idx => Math.min((selectedHome.imgSrcArray?.length || 1) - 1, idx + 1))} disabled={selectedImageIdx === (selectedHome.imgSrcArray?.length || 1) - 1}>&gt;</button>
+                                            <img className="home-detail-main-image" src={homeDetail.length > 0 ? homeDetail[selectedImageIdx].mixedSources.jpeg[0].url : selectedHome.imgSrcArray?.[selectedImageIdx] || selectedHome.imgSrc} alt="Home" />
                                         </div>
                                         <div className="home-detail-thumbnails">
-                                            {(selectedHome.imgSrcArray || [selectedHome.imgSrc]).map((img: string, idx: number) => (
+                                            {(homeDetail.length > 0 ? homeDetail : []).map((img: any, idx: number) => (
                                                 <img
                                                     key={idx}
-                                                    src={img}
+                                                    src={img.mixedSources.jpeg[0].url}
                                                     alt="thumb"
                                                     className={`home-detail-thumb${selectedImageIdx === idx ? ' selected' : ''}`}
                                                     onClick={() => setSelectedImageIdx(idx)}
                                                 />
                                             ))}
                                         </div>
-                                    </>
+                                    </div>
                                 )}
                                 {detailTab === 'street' && (
-                                    <div className="home-detail-streetview">Street view coming soon...</div>
+                                    <div className="home-detail-streetview">
+                                        <img src={streetImage} className="home-detail-streetview-image" alt="Street view" />
+                                    </div>
                                 )}
                             </div>
                         ) : (
@@ -265,6 +295,7 @@ const Landing: React.FC = () => {
                                                         zipcode={listing.zipcode}
                                                         onReportClick={() => window.open(listing.property_url, '_blank')}
                                                         onClick={() => {
+                                                            getHomeDetail(listing.streetAddress + ' ' + listing.city + ' ' + listing.state + ' ' + listing.zipcode);
                                                             setSelectedHome(listing);
                                                             setDetailTab('images');
                                                             setSelectedImageIdx(0);

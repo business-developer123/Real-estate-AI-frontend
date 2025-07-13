@@ -160,6 +160,7 @@ const Landing: React.FC = () => {
                     <div className="header-avatar">B</div>
                 </div>
             </header>
+
             {/* Main Content */}
             <div className="landing-main landing-main-centered">
                 {/* Sidebar */}

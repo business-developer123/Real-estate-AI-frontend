@@ -41,7 +41,7 @@ const Landing: React.FC = () => {
 
     const fetchSearch = async (message: string) => {
         setIsLoading(true);
-        const response = await fetch(`https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-property`, {
+        const response = await fetch(`hhttps://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-property`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ const Landing: React.FC = () => {
     };
 
     const getStreetViewUrl = async (url: string) => {
-        const response = await fetch("https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/streetview", {
+        const response = await fetch("hhttps://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/streetview", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const Landing: React.FC = () => {
             body: JSON.stringify({ location: url }),
         });
         const data = await response.json();
-        const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${data.location.lat},${data.location.lng}&heading=90&pitch=0&key=AIzaSyBV4lXhV-qzQOegyA3m0_AvGy9F21HIyOQ`;
+        const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${data.location.lat},${data.location.lng}&heading=90&pitch=0&key=AIzaSyBn2q4q-VDQASjDl0TVhdCTw5tmjcexiKM`;
         const image = await fetch(imageUrl);
         const imageBlob = await image.blob();
         const streetImageUrl = URL.createObjectURL(imageBlob);
@@ -372,7 +372,6 @@ const Landing: React.FC = () => {
             </div>
         </div>
     );
-
 };
 
 export default Landing;

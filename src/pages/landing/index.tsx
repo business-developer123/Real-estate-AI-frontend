@@ -47,6 +47,11 @@ const Landing: React.FC = () => {
             },
             body: JSON.stringify({ userInput: message }),
         });
+        if (response.status !== 200) {
+            alert('You sent too many requests. Please try again later.');
+            setIsLoading(false);
+            return;
+        }
         const data = await response.json();
         setListings(data.listings);
         setDescription(data.description);
@@ -116,6 +121,7 @@ const Landing: React.FC = () => {
             body: JSON.stringify({ location: url }),
         });
         const data = await response.json();
+
         const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${data.location.lat},${data.location.lng}&heading=90&pitch=0&key=AIzaSyBV4lXhV-qzQOegyA3m0_AvGy9F21HIyOQ`;
         const image = await fetch(imageUrl);
         const imageBlob = await image.blob();
@@ -128,21 +134,6 @@ const Landing: React.FC = () => {
             getStreetViewUrl(streetViewUrl);
         }
     }, [detailTab, streetViewUrl])
-
-    useEffect(() => {
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                handleSearch();
-            }
-        });
-        return () => {
-            document.removeEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    handleSearch();
-                }
-            });
-        }
-    }, [search])
 
     return (
         <div className="landing-root landing-flex">

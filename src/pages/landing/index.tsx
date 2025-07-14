@@ -29,6 +29,7 @@ const Landing: React.FC = () => {
     const [homeDetail, setHomeDetail] = useState<any[]>([]);
     const [streetViewUrl, setStreetViewUrl] = useState('');
     const [streetImage, setStreetImage] = useState('');
+    const [isCardView, setIsCardView] = useState(true);
 
     useEffect(() => {
         if (listings.length > 0) {
@@ -53,6 +54,8 @@ const Landing: React.FC = () => {
             return;
         }
         const data = await response.json();
+        setIsHomeDisplayed(data.cardView);
+        setIsCardView(data.cardView);
         setListings(data.listings);
         setDescription(data.description);
         setIsLoading(false);
@@ -184,12 +187,16 @@ const Landing: React.FC = () => {
                                     ) : (
                                         <div style={{ width: '100%' }}>
                                             <p dangerouslySetInnerHTML={{ __html: description }} />
-                                            <div className="download-row">
-                                                <span className="download-csv-btn" onClick={downloadCSV}>
-                                                    <FaDownload style={{ marginRight: 8 }} /> Download as CSV
-                                                </span>
-                                                <span className="download-status" onClick={() => setIsHomeDisplayed(true)}><FaRegClock style={{ marginRight: 6 }} />Viewing now</span>
-                                            </div>
+                                            {
+                                                isCardView && (
+                                                    <div className="download-row">
+                                                        <span className="download-csv-btn" onClick={downloadCSV}>
+                                                            <FaDownload style={{ marginRight: 8 }} /> Download as CSV
+                                                        </span>
+                                                        <span className="download-status" onClick={() => setIsHomeDisplayed(true)}><FaRegClock style={{ marginRight: 6 }} />Viewing now</span>
+                                                    </div>
+                                                )
+                                            }
                                         </div>
                                     )}
                                 </div>

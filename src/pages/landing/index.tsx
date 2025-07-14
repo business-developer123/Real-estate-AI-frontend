@@ -124,7 +124,6 @@ const Landing: React.FC = () => {
             body: JSON.stringify({ location: url }),
         });
         const data = await response.json();
-
         const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${data.location.lat},${data.location.lng}&heading=90&pitch=0&key=AIzaSyBV4lXhV-qzQOegyA3m0_AvGy9F21HIyOQ`;
         const image = await fetch(imageUrl);
         const imageBlob = await image.blob();

@@ -41,7 +41,7 @@ const Landing: React.FC = () => {
 
     const fetchSearch = async (message: string) => {
         setIsLoading(true);
-        const response = await fetch(`hhttps://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-property`, {
+        const response = await fetch(`https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-property`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ const Landing: React.FC = () => {
             body: JSON.stringify({ userInput: message }),
         });
         if (response.status !== 200) {
-            alert('You sent too many requests. Please try again later.');
+            setDescription("I'm sorry, I couldn't find any properties that match your search.");
             setIsLoading(false);
             return;
         }
@@ -116,7 +116,7 @@ const Landing: React.FC = () => {
     };
 
     const getStreetViewUrl = async (url: string) => {
-        const response = await fetch("hhttps://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/streetview", {
+        const response = await fetch("https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/streetview", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

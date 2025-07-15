@@ -49,7 +49,7 @@ const Landing: React.FC = () => {
             body: JSON.stringify({ userInput: message }),
         });
         if (response.status !== 200) {
-            alert('You sent too many requests. Please try again later.');
+            setDescription("I'm sorry, I couldn't find any properties that match your search.");
             setIsLoading(false);
             return;
         }

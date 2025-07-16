@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './index.css';
 import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHistory, FaRegEdit, FaTimes, FaThLarge, FaMap, FaDownload, FaRegClock, FaBed, FaBath, FaRulerCombined } from 'react-icons/fa';
 import HomeListingCard from '../../components/HomeListingCard';
@@ -30,6 +30,7 @@ const Landing: React.FC = () => {
     const [streetViewUrl, setStreetViewUrl] = useState('');
     const [streetImage, setStreetImage] = useState('');
     const [isCardView, setIsCardView] = useState(true);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (listings.length > 0) {
@@ -54,12 +55,21 @@ const Landing: React.FC = () => {
             return;
         }
         const data = await response.json();
-        setIsHomeDisplayed(data.cardView);
-        setIsCardView(data.cardView);
-        setListings(data.listings);
-        setDescription(data.description);
+        switch (data.type) {
+            case 'listing':
+                setIsHomeDisplayed(true);
+                setIsCardView(true);
+                setListings(data.results);
+                setDescription(data.description);
+                break;
+            case 'analysis':
+                setIsHomeDisplayed(true);
+                setIsCardView(false);
+                setListings([]);
+                setDescription(data.description);
+                break;
+        }
         setIsLoading(false);
-        return data;
     }
 
     const handleSearch = () => {
@@ -84,8 +94,44 @@ const Landing: React.FC = () => {
         setSearch(e.target.value);
     }
 
+    const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchMessage("Import document...")
+        setIsSearchOpen(true);
+        setIsLoading(true);
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const response = await fetch('https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-file', {
+                method: 'POST',
+                body: formData,
+            });
+            if (!response.ok) throw new Error('Failed to analyze file');
+            const data = await response.json();
+            switch (data.type) {
+                case 'listing':
+                    setIsHomeDisplayed(true);
+                    setIsCardView(true);
+                    setListings(data.results);
+                    setDescription(data.description);
+                    break;
+                case 'analysis':
+                    setIsHomeDisplayed(true);
+                    setIsCardView(false);
+                    setListings([]);
+                    setDescription(data.description);
+                    break;
+                default:
+                    break;
+            }
+            setIsLoading(false);
+        } catch (err) {
+            setIsLoading(true);
+        }
+    };
+
     const getHomeDetail = async (address: string) => {
-        console.log(address);
         const response = await fetch(`https://zillow56.p.rapidapi.com/search_address?address=${address}`, {
             method: 'GET',
             headers: {
@@ -200,6 +246,17 @@ const Landing: React.FC = () => {
                                     )}
                                 </div>
                             </div>
+                            {/* <input
+                                type="file"
+                                accept=".pdf,.xlsx,.xls,.doc,.docx"
+                                style={{ display: 'none' }}
+                                id="import-file-input"
+                                ref={fileInputRef}
+                                onChange={handleFileImport}
+                            />
+                            <label htmlFor="import-file-input" style={{ marginLeft: 8, marginBottom: 5, cursor: 'pointer', background: '#7c3aed', color: '#fff', borderRadius: 6, padding: '6px 12px', fontWeight: 500 }}>
+                                Import File
+                            </label> */}
                             <div className="landing-card-bottom">
                                 <div className="landing-search-bar">
                                     <input
@@ -348,6 +405,19 @@ const Landing: React.FC = () => {
                                     <div className="landing-suggestion-card" key={i} onClick={() => keySearch(s)}>{s}</div>
                                 ))}
                             </div>
+                        </div>
+                        <div style={{height: 40, display: "flex", justifyContent: "center"}}>
+                            <input
+                                type="file"
+                                accept=".pdf,.xlsx,.xls,.doc,.docx"
+                                style={{ display: 'none' }}
+                                id="import-file-input"
+                                ref={fileInputRef}
+                                onChange={handleFileImport}
+                            />
+                            <label htmlFor="import-file-input" style={{ marginBottom: 5, display: "block", width: 80, cursor: 'pointer', background: '#7c3aed', color: '#fff', borderRadius: 6, padding: '6px 12px', fontWeight: 500 }}>
+                                Import File
+                            </label>
                         </div>
                         <div className="landing-card-bottom">
                             <div className="landing-search-bar">

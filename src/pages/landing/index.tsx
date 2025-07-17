@@ -1,9 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
-import './index.css';
 import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHistory, FaRegEdit, FaTimes, FaThLarge, FaMap, FaDownload, FaRegClock, FaBed, FaBath, FaRulerCombined } from 'react-icons/fa';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import remarkBreaks from 'remark-breaks';
 import HomeListingCard from '../../components/HomeListingCard';
 import GoogleMapReact from 'google-map-react';
 import Marker from '../../components/Marker';
+import 'highlight.js/styles/github.css';
+import './index.css';
 
 const suggestions = [
     "Find me all single family homes for sale with a pool in 92037",
@@ -231,7 +236,12 @@ const Landing: React.FC = () => {
                                         <span style={{ marginTop: 18 }}>Loading...</span>
                                     ) : (
                                         <div style={{ width: '100%' }}>
-                                            <p dangerouslySetInnerHTML={{ __html: description }} />
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm, remarkBreaks]}
+                                                rehypePlugins={[rehypeHighlight]}
+                                            >
+                                                {description}
+                                            </ReactMarkdown>
                                             {
                                                 isCardView && (
                                                     <div className="download-row">
@@ -246,17 +256,6 @@ const Landing: React.FC = () => {
                                     )}
                                 </div>
                             </div>
-                            {/* <input
-                                type="file"
-                                accept=".pdf,.xlsx,.xls,.doc,.docx"
-                                style={{ display: 'none' }}
-                                id="import-file-input"
-                                ref={fileInputRef}
-                                onChange={handleFileImport}
-                            />
-                            <label htmlFor="import-file-input" style={{ marginLeft: 8, marginBottom: 5, cursor: 'pointer', background: '#7c3aed', color: '#fff', borderRadius: 6, padding: '6px 12px', fontWeight: 500 }}>
-                                Import File
-                            </label> */}
                             <div className="landing-card-bottom">
                                 <div className="landing-search-bar">
                                     <input
@@ -406,7 +405,7 @@ const Landing: React.FC = () => {
                                 ))}
                             </div>
                         </div>
-                        <div style={{height: 40, display: "flex", justifyContent: "center"}}>
+                        <div style={{ height: 40, display: "flex", justifyContent: "center" }}>
                             <input
                                 type="file"
                                 accept=".pdf,.xlsx,.xls,.doc,.docx"

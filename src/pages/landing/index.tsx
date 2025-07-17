@@ -10,6 +10,21 @@ import Marker from '../../components/Marker';
 import 'highlight.js/styles/github.css';
 import './index.css';
 
+function getLastQuestion(text: string): string | null {
+    const matches = text.match(/[^!]*\!+/g);
+    if (!matches) return null;
+    // Trim whitespace and leading/trailing non-alphanumeric characters (except question mark)
+    return matches[matches.length - 1].trim().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9?]+$/g, "");
+}
+
+function getTextWithoutLastQuestion(text: string): string {
+    const matches = text.match(/[^!]*\!+/g);
+    if (!matches) return text;
+    const lastQuestionMatch = matches[matches.length - 1];
+    const lastQuestionIndex = text.lastIndexOf(lastQuestionMatch);
+    return text.substring(0, lastQuestionIndex).trim();
+}
+
 const suggestions = [
     "Find me all single family homes for sale with a pool in 92037",
     "What is the estimated value of 7209 48th Street Ct NW, Gig Harbor, WA 98335?",
@@ -35,7 +50,10 @@ const Landing: React.FC = () => {
     const [streetViewUrl, setStreetViewUrl] = useState('');
     const [streetImage, setStreetImage] = useState('');
     const [isCardView, setIsCardView] = useState(true);
+    const [lastQuestion, setLastQuestion] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     useEffect(() => {
         if (listings.length > 0 && listings[0].latitude && listings[0].longitude) {
@@ -47,12 +65,12 @@ const Landing: React.FC = () => {
 
     const fetchSearch = async (message: string) => {
         setIsLoading(true);
-        const response = await fetch(`http://localhost:1001/api/v1/simpai/analyze-property`, {
+        const response = await fetch(`${backendUrl}/api/v1/simpai/analyze-property`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userInput: message }),
+            body: JSON.stringify({ userInput: message, lastQuestion: lastQuestion }),
         });
         if (response.status !== 200) {
             setDescription("I'm sorry, I couldn't find any properties that match your search.");
@@ -60,17 +78,24 @@ const Landing: React.FC = () => {
             return;
         }
         const data = await response.json();
+        const question = getLastQuestion(data.description);
+        const cleanedDescription = data.description.replace(/!{3,}/g, "");
+        const mainText = getTextWithoutLastQuestion(cleanedDescription);
+        setLastQuestion(question);
         switch (data.type) {
             case 'listing':
                 setIsHomeDisplayed(true);
                 setIsCardView(true);
                 setListings(data.results);
-                setDescription(data.description);
+                setDescription(mainText);
                 break;
             case 'analysis':
                 setIsHomeDisplayed(true);
                 setIsCardView(false);
                 setListings([]);
+                setDescription(mainText);
+                break;
+            default:
                 setDescription(data.description);
                 break;
         }
@@ -108,7 +133,7 @@ const Landing: React.FC = () => {
         const formData = new FormData();
         formData.append('file', file);
         try {
-            const response = await fetch('https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-file', {
+            const response = await fetch(`${backendUrl}/api/v1/simpai/analyze-file`, {
                 method: 'POST',
                 body: formData,
             });
@@ -167,7 +192,7 @@ const Landing: React.FC = () => {
     };
 
     const getStreetViewUrl = async (url: string) => {
-        const response = await fetch("https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/streetview", {
+        const response = await fetch(`${backendUrl}/api/v1/simpai/streetview`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

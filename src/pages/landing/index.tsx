@@ -38,7 +38,7 @@ const Landing: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (listings.length > 0) {
+        if (listings.length > 0 && listings[0].latitude && listings[0].longitude) {
             const firstListing = listings[0] as any;
             setLatitude(firstListing.latitude || latitude);
             setLongitude(firstListing.longitude || longitude);
@@ -47,7 +47,7 @@ const Landing: React.FC = () => {
 
     const fetchSearch = async (message: string) => {
         setIsLoading(true);
-        const response = await fetch(`https://real-estate-ai-backend-9o37.onrender.com/api/v1/simpai/analyze-property`, {
+        const response = await fetch(`http://localhost:1001/api/v1/simpai/analyze-property`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

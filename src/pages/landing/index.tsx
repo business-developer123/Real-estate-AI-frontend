@@ -200,7 +200,7 @@ const Landing: React.FC = () => {
             body: JSON.stringify({ location: url }),
         });
         const data = await response.json();
-        const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${data.location.lat},${data.location.lng}&heading=90&pitch=0&key=AIzaSyBn2q4q-VDQASjDl0TVhdCTw5tmjcexiKM`;
+        const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=600x300&location=${data.location?.lat},${data.location?.lng}&heading=90&pitch=0&key=AIzaSyBn2q4q-VDQASjDl0TVhdCTw5tmjcexiKM`;
         const image = await fetch(imageUrl);
         const imageBlob = await image.blob();
         const streetImageUrl = URL.createObjectURL(imageBlob);

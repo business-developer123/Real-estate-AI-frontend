@@ -56,7 +56,7 @@ const Landing: React.FC = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     useEffect(() => {
-        if (listings.length > 0 && listings[0].latitude && listings[0].longitude) {
+        if (listings && listings.length > 0 && listings[0].latitude && listings[0].longitude) {
             const firstListing = listings[0] as any;
             setLatitude(firstListing.latitude || latitude);
             setLongitude(firstListing.longitude || longitude);

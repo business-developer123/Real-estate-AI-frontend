@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHistory, FaRegEdit, FaTimes, FaThLarge, FaMap, FaDownload, FaRegClock, FaBed, FaBath, FaRulerCombined } from 'react-icons/fa';
+import { FaBell, FaCalculator, FaMapMarkedAlt, FaHome, FaBuilding, FaRobot, FaHistory, FaRegEdit, FaTimes, FaThLarge, FaMap, FaDownload, FaRegClock, FaBed, FaBath, FaRulerCombined, FaArrowLeft } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -13,7 +13,6 @@ import './index.css';
 function getLastQuestion(text: string): string | null {
     const matches = text.match(/[^!]*\!+/g);
     if (!matches) return null;
-    // Trim whitespace and leading/trailing non-alphanumeric characters (except question mark)
     return matches[matches.length - 1].trim().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9?]+$/g, "");
 }
 
@@ -51,17 +50,32 @@ const Landing: React.FC = () => {
     const [streetImage, setStreetImage] = useState('');
     const [isCardView, setIsCardView] = useState(true);
     const [lastQuestion, setLastQuestion] = useState<string | null>(null);
+    const [isHomeDetailOpen, setIsHomeDetailOpen] = useState(false);
+    const [currentId, setCurrentId] = useState<string | null>(null);
+    const [histories, setHistories] = useState<any[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-    useEffect(() => {
-        if (listings && listings.length > 0 && listings[0].latitude && listings[0].longitude) {
-            const firstListing = listings[0] as any;
-            setLatitude(firstListing.latitude || latitude);
-            setLongitude(firstListing.longitude || longitude);
-        }
-    }, [listings]);
+    const getHistories = async () => {
+        const response = await fetch(`${backendUrl}/api/v1/simpai/gethistories?email=${"superman000309@gmail.com"}`,)
+        const data = await response.json();
+        setHistories(data.data);
+    }
+
+    const getHistory = async (id: string) => {
+        setIsHomeDetailOpen((prev) => !prev);
+        const response = await fetch(`${backendUrl}/api/v1/simpai/gethistory?id=${id}`)
+        let data = await response.json();
+        setSearchMessage(data.data[0].title);
+        const cleanedDescription = data.data[0].description.replace(/!{3,}/g, "");
+        setDescription(cleanedDescription);
+        setLastQuestion(data.data[0].lasttitle);
+        setCurrentId(data.data[0].id);
+        if (data.data[0].results) setListings(JSON.parse(data.data[0].results));
+        if (data.data[0].type === "listing") setIsHomeDisplayed(true);
+        else setIsHomeDisplayed(false);
+    }
 
     const fetchSearch = async (message: string) => {
         setIsLoading(true);
@@ -70,7 +84,7 @@ const Landing: React.FC = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userInput: message, lastQuestion: lastQuestion }),
+            body: JSON.stringify({ userInput: message, lastQuestion: lastQuestion, id: currentId ? currentId : null }),
         });
         if (response.status !== 200) {
             setDescription("I'm sorry, I couldn't find any properties that match your search.");
@@ -78,15 +92,17 @@ const Landing: React.FC = () => {
             return;
         }
         const data = await response.json();
-        const question = getLastQuestion(data.description);
-        const cleanedDescription = data.description.replace(/!{3,}/g, "");
+        console.log(data.data)
+        setCurrentId(data.data[0].id);
+        const question = getLastQuestion(data.data[0].description);
+        const cleanedDescription = data.data[0].description.replace(/!{3,}/g, "");
         const mainText = getTextWithoutLastQuestion(cleanedDescription);
         setLastQuestion(question);
-        switch (data.type) {
+        switch (data.data[0].type) {
             case 'listing':
                 setIsHomeDisplayed(true);
                 setIsCardView(true);
-                setListings(data.results);
+                setListings(JSON.parse(data.data[0].results));
                 setDescription(mainText);
                 break;
             case 'analysis':
@@ -96,7 +112,7 @@ const Landing: React.FC = () => {
                 setDescription(mainText);
                 break;
             default:
-                setDescription(data.description);
+                setDescription(data.data[0].description);
                 break;
         }
         setIsLoading(false);
@@ -207,11 +223,21 @@ const Landing: React.FC = () => {
         setStreetImage(streetImageUrl);
     }
 
+
+
     useEffect(() => {
         if (detailTab === 'street' && streetViewUrl) {
             getStreetViewUrl(streetViewUrl);
         }
     }, [detailTab, streetViewUrl])
+
+    useEffect(() => {
+        if (listings && listings.length > 0 && listings[0].latitude && listings[0].longitude) {
+            const firstListing = listings[0] as any;
+            setLatitude(firstListing.latitude || latitude);
+            setLongitude(firstListing.longitude || longitude);
+        }
+    }, [listings]);
 
     return (
         <div className="landing-root landing-flex">
@@ -247,57 +273,88 @@ const Landing: React.FC = () => {
                 {isSearchOpen ? (
                     <div className="landing-content-row">
                         <div className="landing-card landing-chat-col landing-card-search-open">
-                            <div className="landing-card-topbar">
-                                <button className="landing-card-icon-btn" title="History"><FaHistory /></button>
-                                <button className="landing-card-icon-btn" title="Edit"><FaRegEdit /></button>
-                            </div>
-                            <div className="landing-chat-area">
-                                <div className="user-message">
-                                    {searchMessage}
-                                </div>
-                                <div className="assistant-message">
-                                    <span style={{ marginTop: 18 }} className="icon" role="img" aria-label="ai">🤖</span>
-                                    {isLoading ? (
-                                        <span style={{ marginTop: 18 }}>Loading...</span>
-                                    ) : (
-                                        <div style={{ width: '100%' }}>
-                                            <ReactMarkdown
-                                                remarkPlugins={[remarkGfm, remarkBreaks]}
-                                                rehypePlugins={[rehypeHighlight]}
-                                            >
-                                                {description}
-                                            </ReactMarkdown>
+                            {!isHomeDetailOpen ? (
+                                <>
+                                    <div className="landing-card-topbar">
+                                        <button className="landing-card-icon-btn" title="History" onClick={() => {
+                                            setIsHomeDetailOpen(true)
+                                            getHistories();
+                                        }}><FaHistory /></button>
+                                        <button className="landing-card-icon-btn" title="New" onClick={() => {
+                                            setIsSearchOpen(false)
+                                            setCurrentId("");
+                                        }}><FaRegEdit /></button>
+                                    </div>
+                                    <div className="landing-chat-area">
+                                        <div className="user-message">
+                                            {searchMessage}
+                                        </div>
+                                        <div className="assistant-message">
+                                            <span style={{ marginTop: 18 }} className="icon" role="img" aria-label="ai">🤖</span>
+                                            {isLoading ? (
+                                                <span style={{ marginTop: 18 }}>Loading...</span>
+                                            ) : (
+                                                <div style={{ width: '100%' }}>
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[remarkGfm, remarkBreaks]}
+                                                        rehypePlugins={[rehypeHighlight]}
+                                                    >
+                                                        {description}
+                                                    </ReactMarkdown>
+                                                    {
+                                                        isCardView && (
+                                                            <div className="download-row">
+                                                                <span className="download-csv-btn" onClick={downloadCSV}>
+                                                                    <FaDownload style={{ marginRight: 8 }} /> Download as CSV
+                                                                </span>
+                                                                <span className="download-status" onClick={() => setIsHomeDisplayed(true)}><FaRegClock style={{ marginRight: 6 }} />Viewing now</span>
+                                                            </div>
+                                                        )
+                                                    }
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="landing-card-bottom">
+                                        <div className="landing-search-bar">
+                                            <input
+                                                className="landing-search-input"
+                                                placeholder="123 , city , State"
+                                                autoComplete="off"
+                                                value={search}
+                                                onChange={handleSearchChange}
+                                            />
+                                            <button className="landing-search-btn" onClick={handleSearch}>
+                                                <span className="landing-search-arrow">→</span>
+                                            </button>
+                                        </div>
+                                        <div className="landing-search-hint">
+                                            Ask about properties, market trends, or investment opportunities
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="landing-history-topbar">
+                                        <div className="back-btn" onClick={() => {
+                                            if (searchMessage) {
+                                                setIsHomeDetailOpen(false)
+                                            } else {
+                                                setIsHomeDetailOpen(false)
+                                                setIsSearchOpen(false)
+                                            }
+                                        }}>
+                                            <FaArrowLeft />
+                                            Back to chat
+                                        </div>
+                                        <div className="home-detail-titles">
                                             {
-                                                isCardView && (
-                                                    <div className="download-row">
-                                                        <span className="download-csv-btn" onClick={downloadCSV}>
-                                                            <FaDownload style={{ marginRight: 8 }} /> Download as CSV
-                                                        </span>
-                                                        <span className="download-status" onClick={() => setIsHomeDisplayed(true)}><FaRegClock style={{ marginRight: 6 }} />Viewing now</span>
-                                                    </div>
-                                                )
+                                                histories.length ? histories.map((item, idx) => <div key={idx} className='home-history-title' onClick={() => getHistory(item.id)} >{item.title}</div>) : ""
                                             }
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="landing-card-bottom">
-                                <div className="landing-search-bar">
-                                    <input
-                                        className="landing-search-input"
-                                        placeholder="123 , city , State"
-                                        autoComplete="off"
-                                        value={search}
-                                        onChange={handleSearchChange}
-                                    />
-                                    <button className="landing-search-btn" onClick={handleSearch}>
-                                        <span className="landing-search-arrow">→</span>
-                                    </button>
-                                </div>
-                                <div className="landing-search-hint">
-                                    Ask about properties, market trends, or investment opportunities
-                                </div>
-                            </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                         {selectedHome ? (
                             <div className="home-detail-section">
@@ -385,7 +442,7 @@ const Landing: React.FC = () => {
                                                         city={listing.city}
                                                         state={listing.state}
                                                         zipcode={listing.zipcode}
-                                                        onReportClick={() => window.open(listing.property_url, '_blank')}
+                                                        listing={listing}
                                                         onClick={() => {
                                                             getHomeDetail(listing.streetAddress + ' ' + listing.city + ' ' + listing.state + ' ' + listing.zipcode);
                                                             setSelectedHome(listing);
@@ -419,8 +476,15 @@ const Landing: React.FC = () => {
                 ) : (
                     <div className={`landing-card`}>
                         <div className="landing-card-topbar">
-                            <button className="landing-card-icon-btn" title="History"><FaHistory /></button>
-                            <button className="landing-card-icon-btn" title="Edit"><FaRegEdit /></button>
+                            <button className="landing-card-icon-btn" title="History" onClick={() => {
+                                setIsSearchOpen(true)
+                                setIsHomeDetailOpen(true)
+                                getHistories()
+                            }}><FaHistory /></button>
+                            <button className="landing-card-icon-btn" title="New" onClick={() => {
+                                setIsSearchOpen(false)
+                                setCurrentId("");
+                            }}><FaRegEdit /></button>
                         </div>
                         <div className="landing-card-content">
                             <h1 className="landing-title">Instant Real Estate Insights</h1>
@@ -464,7 +528,7 @@ const Landing: React.FC = () => {
                 )}
                 <div className="landing-cityscape-bg"></div>
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -2519,3 +2519,42 @@ blockquote {
     border-left: 4px solid var(--accent-color);
     color: #d1d5db;
 }
+
+.back-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: color 0.4s;
+}
+
+.back-btn:hover {
+    color: #7c3aed;
+    transition: color 0.4s;
+}
+
+.landing-history-topbar {
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.home-history-title {
+    font-size: 15px;
+    padding: 10px;
+    transition: background-color 0.4s;
+    border-radius: 8px;
+    color: #2a2a2c;
+}
+
+.home-history-title:hover {
+    cursor: pointer;
+    background-color: #f3f2f2;
+    border-radius: 8px;
+    transition: background-color 0.4s;
+}

@@ -92,7 +92,6 @@ const Landing: React.FC = () => {
             return;
         }
         const data = await response.json();
-        console.log(data.data)
         setCurrentId(data.data[0].id);
         const question = getLastQuestion(data.data[0].description);
         const cleanedDescription = data.data[0].description.replace(/!{3,}/g, "");

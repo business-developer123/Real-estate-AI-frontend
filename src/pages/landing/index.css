@@ -1926,11 +1926,63 @@
     font-size: 1rem;
     cursor: pointer;
     margin-top: 6px;
-    transition: background 0.18s;
+    transition: background 0.18s, opacity 0.18s;
+    width: 100%;
+    position: relative;
 }
 
-.home-listing-report-btn:hover {
+.home-listing-report-btn:hover:not(:disabled) {
     background: #5b21b6;
+}
+
+.home-listing-report-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.home-listing-report-btn.loading {
+    background: #9333ea;
+}
+
+@media (max-width: 768px) {
+    .home-listing-card {
+        min-width: 280px;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .home-listings-scroll {
+        gap: 16px;
+        padding: 16px 8px;
+    }
+
+    .home-listing-report-btn {
+        font-size: 0.9rem;
+        padding: 0.7em 1em;
+    }
+
+    .home-listing-address {
+        font-size: 1rem;
+    }
+
+    .home-listing-price {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-listing-card {
+        min-width: 250px;
+    }
+
+    .home-listing-info {
+        padding: 14px 14px 12px 14px;
+    }
+
+    .home-listing-report-btn {
+        font-size: 0.85rem;
+        padding: 0.65em 0.9em;
+    }
 }
 
 .landing-content-row {

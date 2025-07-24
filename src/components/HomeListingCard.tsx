@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface HomeListingCardProps {
     imageUrl?: string;
@@ -29,17 +30,47 @@ const HomeListingCard: React.FC<HomeListingCardProps> = ({
     onClick,
 }) => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
     const getReport = async (data: any) => {
-        const response = await fetch(`${backendUrl}/api/v1/simpai/get-report`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        })
-        const reportData = await response.json();
-        console.log(reportData);
+        if (isGeneratingReport) return;
+
+        setIsGeneratingReport(true);
+        const toastId = toast.loading('Generating property report...');
+
+        try {
+            const response = await fetch(`${backendUrl}/api/v1/simpai/get-report`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ listing: data })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to generate report');
+            }
+
+            // Get the PDF blob
+            const blob = await response.blob();
+
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `property-report-${data.streetAddress?.replace(/\s+/g, '-') || 'property'}-${Date.now()}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            toast.success('Property report downloaded successfully!', { id: toastId });
+        } catch (error) {
+            console.error('Error generating report:', error);
+            toast.error('Failed to generate property report. Please try again.', { id: toastId });
+        } finally {
+            setIsGeneratingReport(false);
+        }
     }
 
     return (
@@ -59,13 +90,14 @@ const HomeListingCard: React.FC<HomeListingCardProps> = ({
                 </div>
                 <div className="home-listing-price">${price.toLocaleString()}</div>
                 <button
-                    className="home-listing-report-btn"
+                    className={`home-listing-report-btn ${isGeneratingReport ? 'loading' : ''}`}
                     onClick={e => {
                         e.stopPropagation();
                         getReport(listing);
                     }}
+                    disabled={isGeneratingReport}
                 >
-                    Get Property Report
+                    {isGeneratingReport ? 'Generating...' : 'Get Property Report'}
                 </button>
             </div>
         </div>

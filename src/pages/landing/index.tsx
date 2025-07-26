@@ -222,8 +222,6 @@ const Landing: React.FC = () => {
         setStreetImage(streetImageUrl);
     }
 
-
-
     useEffect(() => {
         if (detailTab === 'street' && streetViewUrl) {
             getStreetViewUrl(streetViewUrl);

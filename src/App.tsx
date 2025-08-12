@@ -2,10 +2,12 @@ import { BrowserRouter } from 'react-router-dom'
 import './App.css'
 import Router from './routes'
 import { Toaster } from 'react-hot-toast'
+import TopBanner from './components/TopBanner'
 
 function App() {
   return (
     <BrowserRouter>
+      <TopBanner />
       <Router />
       <Toaster
         position="top-right"

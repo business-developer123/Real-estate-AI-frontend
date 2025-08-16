@@ -453,7 +453,7 @@ const Landing: React.FC = () => {
                                         {viewMode === 'map' && (
                                             <div className="home-listings-map-placeholder">
                                                 <GoogleMapReact
-                                                    bootstrapURLKeys={{ key: "AIzaSyB6IcDkdLFimq6E5YVNyuslp3Z2O2IpZU0" }}
+                                                    bootstrapURLKeys={{ key: "AIzaSyB32OTfrZzx4ypSxpQdQHXUeaMwL--nfVw" }}
                                                     // AIzaSyB32OTfrZzx4ypSxpQdQHXUeaMwL--nfVw
                                                     // AIzaSyB6IcDkdLFimq6E5YVNyuslp3Z2O2IpZU0
                                                     defaultCenter={{ lat: latitude, lng: longitude }}

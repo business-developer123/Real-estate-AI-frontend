@@ -16,6 +16,7 @@ function getLastQuestion(text: string): string | null {
     return matches[matches.length - 1].trim().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9?]+$/g, "");
 }
 
+
 function getTextWithoutLastQuestion(text: string): string {
     const matches = text.match(/[^!]*\!+/g);
     if (!matches) return text;

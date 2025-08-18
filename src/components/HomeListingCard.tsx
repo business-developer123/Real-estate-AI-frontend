@@ -51,18 +51,21 @@ const HomeListingCard: React.FC<HomeListingCardProps> = ({
                 throw new Error('Failed to generate report');
             }
 
-            // Get the PDF blob
-            const blob = await response.blob();
+            // Get the response with download URL
+            const result = await response.json();
 
-            // Create download link
-            const url = window.URL.createObjectURL(blob);
+            if (!result.success || !result.downloadUrl) {
+                throw new Error('Failed to get download URL');
+            }
+
+            // Create download link using the server file URL
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `property-report-${data.streetAddress?.replace(/\s+/g, '-') || 'property'}-${Date.now()}.pdf`;
+            a.href = result.downloadUrl;
+            a.download = result.fileName;
+            a.target = '_blank'; // Open in new tab as fallback
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
 
             toast.success('Property report downloaded successfully!', { id: toastId });
         } catch (error) {

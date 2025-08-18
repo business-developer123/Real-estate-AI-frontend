@@ -16,7 +16,6 @@ function getLastQuestion(text: string): string | null {
     return matches[matches.length - 1].trim().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9?]+$/g, "");
 }
 
-
 function getTextWithoutLastQuestion(text: string): string {
     const matches = text.match(/[^!]*\!+/g);
     if (!matches) return text;
@@ -267,6 +266,7 @@ const Landing: React.FC = () => {
                         <a className="sidebar-nav-link active" href="#"><FaRobot /> Simp AI</a>
                     </nav>
                 </aside>
+                
                 {/* Main Content and Listings Side-by-Side */}
                 {isSearchOpen ? (
                     <div className="landing-content-row">

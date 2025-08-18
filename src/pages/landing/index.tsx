@@ -266,7 +266,7 @@ const Landing: React.FC = () => {
                         <a className="sidebar-nav-link active" href="#"><FaRobot /> Simp AI</a>
                     </nav>
                 </aside>
-                {/* Main Content and Listings Side-by-Side */}
+                
                 {isSearchOpen ? (
                     <div className="landing-content-row">
                         <div className="landing-card landing-chat-col landing-card-search-open">

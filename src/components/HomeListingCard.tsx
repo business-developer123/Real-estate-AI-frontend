@@ -58,8 +58,14 @@ const HomeListingCard: React.FC<HomeListingCardProps> = ({
                 throw new Error('Failed to get download URL');
             }
 
-            // Use window.location.assign to trigger the download in the current tab
-            window.location.assign(result.downloadUrl);
+            // Create a temporary anchor element to force download
+            const link = document.createElement('a');
+            link.href = result.downloadUrl;
+            link.download = result.fileName || 'property-report.pdf';
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
             toast.success('Property report downloaded successfully!', { id: toastId });
         } catch (error) {
